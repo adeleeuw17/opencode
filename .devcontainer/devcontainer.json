@@ -1,0 +1,4 @@
+{
+  "name": "opencode-dev",
+  "image": "oven/bun:1.3"
+}
