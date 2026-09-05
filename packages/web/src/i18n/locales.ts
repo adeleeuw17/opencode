@@ -115,3 +115,37 @@ export function matchLocale(input: string) {
 
   return starts.find((item) => value.startsWith(item[0]))?.[1] ?? null
 }
+
+export function parseAcceptLanguage(header: string | null): { lang: string; q: number }[] {
+  if (!header) return []
+
+  return header
+    .split(",")
+    .map((raw) => raw.trim())
+    .filter(Boolean)
+    .map((raw) => {
+      const parts = raw.split(";").map((x) => x.trim())
+      const lang = parts[0] ?? ""
+      const q = parts
+        .slice(1)
+        .find((x) => x.startsWith("q="))
+        ?.slice(2)
+      return {
+        lang,
+        q: q ? Number.parseFloat(q) : 1,
+      }
+    })
+    .sort((a, b) => b.q - a.q)
+}
+
+export function localeFromAcceptLanguage(header: string | null) {
+  const items = parseAcceptLanguage(header)
+
+  const locale = items
+    .map((item) => item.lang)
+    .filter((lang) => lang && lang !== "*")
+    .map((lang) => matchLocale(lang))
+    .find((lang) => lang)
+
+  return locale ?? "root"
+}
